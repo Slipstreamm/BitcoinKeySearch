@@ -21,5 +21,8 @@
     <ClCompile Include="bitcoin_key_searcher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="simd_optimizations.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

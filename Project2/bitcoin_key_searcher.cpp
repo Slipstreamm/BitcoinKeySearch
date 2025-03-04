@@ -687,32 +687,33 @@ private:
     void searchThread() {
         CryptoAddressGenerator generator;
 
+        // Increase batch size for fewer repeated operations
+        static const size_t batchSize = 256;
+        std::vector<std::vector<std::string>> addressesVec(batchSize);
+
         while (running) {
-            // Generate random private key
-            uint8_t privateKey[PRIVKEY_LENGTH];
-            generator.generateRandomPrivateKey(privateKey);
-
-            // Generate addresses for different cryptocurrencies
-            std::vector<std::string> addresses = generator.generateAllAddresses();
-
-            // Check if any address is in the database
-            if (db.containsAny(addresses)) {
-                {
-                    std::lock_guard<std::mutex> lock(output_mutex);
-                    output_file << "Private Key: " << generator.getPrivateKeyHex() << std::endl;
-                    output_file << "BTC: " << addresses[0] << std::endl;
-                    output_file << "BCH: " << addresses[1] << std::endl;
-                    output_file << "DASH: " << addresses[2] << std::endl;
-                    output_file << "DOGE: " << addresses[3] << std::endl;
-                    output_file << "LTC: " << addresses[4] << std::endl;
-                    output_file << "ETH: " << addresses[5] << std::endl;
-                    output_file << "----------------------------" << std::endl;
-                    output_file.flush();
-                }
-                found_keys++;
+            // Generate addresses in batches
+            for (size_t i = 0; i < batchSize; ++i) {
+                addressesVec[i] = generator.generateAllAddresses(); 
             }
 
-            total_keys_checked++;
+            // Check each batch item
+            for (size_t i = 0; i < batchSize; ++i) {
+                if (db.containsAny(addressesVec[i])) {
+                    std::lock_guard<std::mutex> lock(output_mutex);
+                    output_file << "Private Key: " << generator.getPrivateKeyHex() << std::endl;
+                    output_file << "BTC: " << addressesVec[i][0] << std::endl;
+                    output_file << "BCH: " << addressesVec[i][1] << std::endl;
+                    output_file << "DASH: " << addressesVec[i][2] << std::endl;
+                    output_file << "DOGE: " << addressesVec[i][3] << std::endl;
+                    output_file << "LTC: " << addressesVec[i][4] << std::endl;
+                    output_file << "ETH: " << addressesVec[i][5] << std::endl;
+                    output_file << "----------------------------" << std::endl;
+                    // Remove frequent flushes: flush only on intervals
+                }
+                found_keys++;
+                total_keys_checked++;
+            }
         }
     }
 };

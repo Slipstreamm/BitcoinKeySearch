@@ -132,6 +132,7 @@
   <ItemGroup>
     <ClCompile Include="bitcoin_key_searcher.cpp" />
     <ClCompile Include="FileName.cpp" />
+    <ClCompile Include="simd_optimizations.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
